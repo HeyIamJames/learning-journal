@@ -17,3 +17,9 @@ h1 {
 #entries li {
 	text-align: left;
 }
+
+footer {
+   position:fixed;
+   bottom:0;
+   background-color: red;
+}
