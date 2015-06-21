@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> James's Journal'</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>James Hemmaplardh's Learning Journal</h1>
+      </a>
+      <nav>
+        <ul id="menu">
+          <li><a href="home.html" class="selected">Home</a></li>
+          <li><a href="detail.html" >Detail</a></li>
+          <li><a href="new.html" >New</a></li>
+          <li><a href="edit.html" >Edit</a></li>
+        </ul>
+      </nav>
+         <script>
+            $(document).ready (function () {
+            	var count = 0;
+                $("button").on('click',function() {
+					var item = '<li>' + $("#list").val() + '</li>'
+					$("ol").prepend(item);
+				});              
+            }); 
+        </script>
+    </head>
+
+    <body>
+		<p>Add journal entry: <input type="text" id="list" value=" ">
+			<button>Click to add entry</button>
+		</p>
+
+		<div class="list">
+	        <ol></ol>
+	    </div>
+		
+	    
+    </body>
+
+
