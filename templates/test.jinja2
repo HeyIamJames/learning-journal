@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<html>
+<p>
+this is template
+</p>
+
+<a href="{{ request.route_url('other', special_val=42) }}"> clickeme </a>
+
+<ol>
+  {%for thing in stuff %}
+  <li>{{ thing }}</li>li>
+  {%endfor %}
+</ol>
+
+</html>
