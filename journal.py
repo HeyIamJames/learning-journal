@@ -1,37 +1,65 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
 import os
-import datetime
 from pyramid.config import Configurator
 from pyramid.view import view_config
 from waitress import serve
+import datetime
+import sqlalchemy as sa
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
+from pyramid.httpexceptions import HTTPNotFound
+#--maybe--
+from sqlalchemy.exc import IntegrityError
+#---------
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-
-# DATABASE_URL = os.environ.get(
-#     'DATABASE_URL',
-#     'postgresql://jameshemmaplardh:123@localhost:5432/learning-journal'
-# )
-
-#request.GET
-
 Base = declarative_base()
+DATABASE_URL = os.environ.get(
+    'DATABASE_URL',
+    'postgresql://jameshemmaplardh:123@localhost:5432/learning-journal'
+)
 
-from pyramid.httpexceptions import HTTPNotFound
 
-@view_config(route_name='home', renderer='templates/test.jinja2')
+class Entry(Base):
+    __tablename__ = 'entries'
+    
+    id = sa.Column(sa.Integer, primary_key=True)
+    title = sa.Column(sa.Unicode(127), nullable=False, unique=True)
+    text = sa.Column(sa.Unicode(), nullable=False)
+    created = sa.Column(
+        sa.DateTime, nullable=False, default=datetime.datetime.utcnow)
+
+    @classmethod
+    def write(cls, title=None, text=None, session=None):
+        if title == "":
+            raise ValueError()
+        if not session:
+            session = DBSession
+        instance = cls(title=title, text=text)
+        session.add(instance)
+        return instance
+    
+    @classmethod
+    def all(cls, session=None):
+        if session == None:
+            session = DBSession
+        return session.query(cls).order_by(cls.created.desc()).all()
+
+def init_db():
+    engine = create_engine(DATABASE_URL)
+    Base.metadata.create_all(engine)
+
+@view_config(route_name='home', renderer='templates/list.jinja2')
 def home(request):
-    #import pdb; pdb.set_trace() #creates and sets break point for pb prompt
-    #return "Hello World"
-    return {'one': 'two'}
+    #import pdb; pdb.set_trace()
+    return {"entries":Entry.all()}
 
-@view_config(route_name='other', renderer='string')
+@view_config(route_name="other", renderer="string")
 def other(request):
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     return request.matchdict
 
 def main():
@@ -41,59 +69,20 @@ def main():
     settings['reload_all'] = debug
     settings['debug_all'] = debug
     if not os.environ.get('TESTING', False):
-        # only bind the session if we are not testing
         engine = sa.create_engine(DATABASE_URL)
         DBSession.configure(bind=engine)
-    config = Configurator(
-        settings=settings
-    )
-    config.include('pyramid_tm')
     # configuration setup
     config = Configurator(
         settings=settings
     )
-    config.include('pyramid_jinja2') #added for req
+    config.include('pyramid_tm')
+    config.include('pyramid_jinja2')
     config.add_route('home', '/')
-    config.add_route('other', '/other/{special_val}')
+    config.add_route('other', '/ayylmao/{special_val}')
     config.scan()
     app = config.make_wsgi_app()
     return app
 
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://jameshemmaplardh:123@localhost:5432/learning-journal'
-)
-
-#from chris
-class Entry(Base):
-    __tablename__ = 'entries'
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
-    title = sa.Column(sa.Unicode(127), nullable=False)
-    text = sa.Column(sa.UnicodeText, nullable=False)
-    created = sa.Column(
-        sa.DateTime, nullable=False, default=datetime.datetime.utcnow
-    )
-    # @classmethod
-    # def write(cls, title=None, text=None, session=None):
-    #     instance = cls(title=title, text=text)
-    #     return instance
-    
-    @classmethod
-    def write(cls, title=None, text=None, session=None):
-        if session is None:
-            session = DBSession
-        instance = cls(title=title, text=text)
-        session.add(instance)
-        return instance
-
-def init_db():
-    engine = sa.create_engine(DATABASE_URL)
-    Base.metadata.create_all(engine)
-
-# def write():
-#     'title': "Test Title", 'text': "Test entry text"
-
-\
 
 if __name__ == '__main__':
     app = main()
