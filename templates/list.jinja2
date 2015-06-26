@@ -1,4 +1,4 @@
-{% extends "base.jinja2" %}
+{% extends "new.jinja2" %}
 {% block body %}
 {% if request.authenticated_userid %}
 <aside>
@@ -17,6 +17,7 @@
 </form>
 </aside>
 {% endif %} 
+
   <h2>Entries</h2>
   {% for entry in entries %}
   <article class="entry" id="entry={{entry.id}}">

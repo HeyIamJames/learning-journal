@@ -1,0 +1,32 @@
+
+
+<!DOCTYPE html>
+<html>
+  <li><a href="{{ request.route_url('edit') }}">edit</a></li>
+  <head>
+    <meta charset="utf-8">
+    <title> James's Journal'</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>James Hemmaplardh's Learning Journal</h1>
+      </a>
+      <nav>
+        <ul id="menu">
+        <li>
+            <li><a href="{{ request.route_url('home') }}">Home</a></li>
+          <li><a href="{{ request.route_url('detail') }}" >Detail</a></li>
+          <li><a href="{{ request.route_url('new') }}" >New</a></li>
+          <li><a href="{{ request.route_url('edit') }}" >Edit</a></li>
+        </ul>
+    <main>
+     <section id="content">
+      {% block body %}{% endblock %}
+      </section>
+    </main>
+
+ <footer>
+   <a href="{{ request.route_url('home') }}" >To return home, select the Home button above or select this text.</a> 
+  </footer>
+</html>

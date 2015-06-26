@@ -23,10 +23,10 @@
         </aside>
             <nav>
         <ul id="menu">
-          <li><a href="home.html" class="selected">Home</a></li>
-          <li><a href="detail.html" >Detail</a></li>
-          <li><a href="new.html" >New</a></li>
-          <li><a href="edit.html" >Edit</a></li>
+          <li><a href="{{ request.route_url('home') }}">Home</a></li>
+          <li><a href="{{ request.route_url('detail') }}" >Detail</a></li>
+          <li><a href="{{ request.route_url('new') }}" >New</a></li>
+          <li><a href="{{ request.route_url('edit') }}" >Edit</a></li>
         </ul>
       </nav>
       <nav>
@@ -37,9 +37,9 @@
     </header>
     <main>
       <h1>My Python Journal</h1>
-      <section id="content">
-      {% block body %}{% endblock %}
-      </section>
+      <p>
+            <h1> INSERT ENTRY LIST OF ENTRY NUMBERS </h1>
+      </p>
     </main>
      <footer>
         <a href="home.html"> To return home, select the Home button above or select this text.
