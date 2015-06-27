@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Python Learning Journal</title>
+    <title> James's Journal'</title>
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -11,6 +11,7 @@
   </head>
   <body>
     <header>
+    <h1>James Hemmaplardh's Learning Journal</h1>
         <aside id="user-controls">
         <ul>
         {% if not request.authenticated_userid %}
@@ -20,6 +21,14 @@
         {% endif %}
         </ul>
         </aside>
+            <nav>
+        <ul id="menu">
+          <li><a href="{{ request.route_url('home') }}">Home</a></li>
+          <li><a href="{{ request.route_url('detail') }}" >Detail</a></li>
+          <li><a href="{{ request.route_url('new') }}" >New</a></li>
+          <li><a href="{{ request.route_url('edit') }}" >Edit</a></li>
+        </ul>
+      </nav>
       <nav>
         <ul>
           <li><a href="/">Home</a></li>
@@ -28,12 +37,12 @@
     </header>
     <main>
       <h1>My Python Journal</h1>
-      <section id="content">
-      {% block body %}{% endblock %}
-      </section>
+      <p>
+            <h1> INSERT ENTRY LIST OF ENTRY NUMBERS </h1>
+      </p>
     </main>
-    <footer>
-      <p>Created in the Code Fellows Python Dev Accelerator</p>
-    </footer>
+     <footer>
+        <a href="home.html"> To return home, select the Home button above or select this text.
+      </footer>
   </body>
 </html>

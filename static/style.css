@@ -1,3 +1,28 @@
+h1 {
+    text-align: center;
+    color: #0000ff;
+    background-color: #00ff00;
+    font-size: 60px;
+}
+
+#menu li {
+  display: inline-block;
+  text-align: left;
+  color: #ff0000;
+  font-size: 25px;
+
+}
+
+#entries li {
+    text-align: left;
+}
+
+footer {
+   position:fixed;
+   bottom:0;
+   background-color: red;
+}
+
 body{
     color:#111;
     padding:0;

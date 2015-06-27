@@ -82,7 +82,8 @@ def add_entry(request):
     title = request.params.get('title')
     text = request.params.get('text')
     Entry.write(title=title, text=text)
-    return HTTPFound(request.route_url('home'))
+    # return HTTPFound(request.route_url('home'))
+    return HTTPFound(request.route_url('new'))
 
 @view_config(context=DBAPIError)
 def db_exception(context, request):
@@ -95,15 +96,40 @@ def init_db():
     engine = create_engine(DATABASE_URL)
     Base.metadata.create_all(engine)
 
-@view_config(route_name='home', renderer='templates/list.jinja2')
+@view_config(route_name='home', renderer='templates/base.jinja2')
 def home(request):
     #import pdb; pdb.set_trace()
     return {"entries":Entry.all()}
+
+@view_config(route_name='edit', renderer='templates/edit.jinja2')
+def edit_entry(request):
+    # import pdb; pdb.set_trace()
+    # entry = read_one_entry_from_db(request)
+    return {}
+
+@view_config(route_name='detail', renderer='templates/detail.jinja2')
+def detailed_entry(request):
+    # import pdb; pdb.set_trace()
+    # entry = read_one_entry_from_db(request)
+    return {}
+
+@view_config(route_name='new', renderer='templates/list.jinja2')
+def new_entry(request):
+    # import pdb; pdb.set_trace()
+    # entry = read_one_entry_from_db(request)
+    return {"entries": Entry.all()}
+
 
 @view_config(route_name="other", renderer="string")
 def other(request):
     import pdb; pdb.set_trace()
     return request.matchdict
+
+#new view for edit.jinja2
+# @view_config(route_name='home', renderer='templates/list.jinja2')
+# def home(request):
+#     #import pdb; pdb.set_trace()
+#     return {"entries":Entry.all()}
 
 def main():
     """Create a configured wsgi app"""
@@ -137,6 +163,9 @@ def main():
     config.add_route('home', '/')
     config.add_route('add', '/add')
     config.add_route('other', '/ayylmao/{special_val}')
+    config.add_route('edit', '/edit')
+    config.add_route('detail', '/detail')
+    config.add_route('new', '/new')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.scan()
