@@ -1,30 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <li><a href="{{ request.route_url('edit') }}">edit</a></li>
-  <head>
-    <meta charset="utf-8">
-    <title> James's Journal'</title>
-    <link rel="stylesheet" href="/static/style.css">
-  </head>
-  <body>
-    <header>
-      <h1>James Hemmaplardh's Learning Journal</h1>
-      </a>
-      <nav>
-        <ul id="menu">
-        <li>
-            <li><a href="{{ request.route_url('home') }}">Home</a></li>
-          <li><a href="{{ request.route_url('detail') }}" >Detail</a></li>
-          <li><a href="{{ request.route_url('new') }}" >New</a></li>
-          <li><a href="{{ request.route_url('edit') }}" >Edit</a></li>
-        </ul>
-    <main>
-     <section id="content">
-      {% block body %}{% endblock %}
-      </section>
-    </main>
-
- <footer>
-   <a href="{{ request.route_url('home') }}" >To return home, select the Home button above or select this text.</a> 
-  </footer>
-</html>
+{% extends "base.jinja2" %}
+{% block body %}
+   {% if request.authenticated_userid %}   
+      <form action="{{ request.route_url('edit_entry', entryID=entry.id) }}" method="POST" class="edit_entry">
+            <label for="title">Title</label> <br>
+          <input type="text" size="30" name="title" value="{{ entry.title }}" id="title"/><br>
+      <label for="text">Text</label><br>
+      <textarea name="text" id="text" rows="5" cols="80">{{ entry.text }}</textarea><br>
+            <input type="submit" value="Edit" name="edit"/>
+   {% else %}
+      <p>Please <a href="/login">log in</a> to edit journal entries</p>
+   {% endif %}
+{% endblock %}
+{% block nav %}
+  <ul>
+   <li><a href="/">Home</a></li>
+   {% if request.authenticated_userid %}   
+   <li><a href="/new">new</a></li>
+   <li><a href="/logout">log out</a></li>
+   {% else %}
+   <li><a href="/login">log in</a></li>
+     {% endif %}
+   </ul>
+{% endblock %}

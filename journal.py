@@ -18,6 +18,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
+from markdown import markdown
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -82,8 +83,7 @@ def add_entry(request):
     title = request.params.get('title')
     text = request.params.get('text')
     Entry.write(title=title, text=text)
-    # return HTTPFound(request.route_url('home'))
-    return HTTPFound(request.route_url('new'))
+    return HTTPFound(request.route_url('home'))
 
 @view_config(context=DBAPIError)
 def db_exception(context, request):
@@ -96,40 +96,64 @@ def init_db():
     engine = create_engine(DATABASE_URL)
     Base.metadata.create_all(engine)
 
-@view_config(route_name='home', renderer='templates/base.jinja2')
+@view_config(route_name='home', renderer='templates/index.jinja2')
 def home(request):
     #import pdb; pdb.set_trace()
-    return {"entries":Entry.all()}
+     return {"entry":entry,
+        "text":markdown(entry.text, extensions=['codehilite', 
+                                               'fenced_code'])}
 
-@view_config(route_name='edit', renderer='templates/edit.jinja2')
+
+@view_config(route_name="detail", renderer="templates/detail.jinja2")
+def detail(request):
+    #import pdb; pdb.set_trace()
+    entries = Entry.all()
+    entry = entries[::-1][int(request.matchdict["entryID"])-1]
+    return {"entry":entry}
+
+@view_config(route_name="edit", renderer="templates/edit.jinja2")
+def edit(request):
+    #import pdb; pdb.set_trace()
+    entries = Entry.all()
+    entry = entries[::-1][int(request.matchdict["entryID"])-1]
+    return {"entry":entry}
+
+@view_config(route_name="edit_entry",request_method='POST')
 def edit_entry(request):
-    # import pdb; pdb.set_trace()
-    # entry = read_one_entry_from_db(request)
+    #import pdb; pdb.set_trace()
+    entry = Entry.all()[::-1][int(request.matchdict["entryID"])-1]
+    entry.title = request.params.get('title')
+    entry.text = request.params.get('text')
+    DBSession.flush()
+    return HTTPFound(request.route_url('detail', entryID = entry.id))
+
+@view_config(route_name="new", renderer="templates/new.jinja2")
+def new(request):
+    
     return {}
 
-@view_config(route_name='detail', renderer='templates/detail.jinja2')
-def detailed_entry(request):
-    # import pdb; pdb.set_trace()
-    # entry = read_one_entry_from_db(request)
-    return {}
-
-@view_config(route_name='new', renderer='templates/list.jinja2')
-def new_entry(request):
-    # import pdb; pdb.set_trace()
-    # entry = read_one_entry_from_db(request)
-    return {"entries": Entry.all()}
-
-
-@view_config(route_name="other", renderer="string")
-def other(request):
-    import pdb; pdb.set_trace()
-    return request.matchdict
+# @view_config(route_name="other", renderer="string")
+# def other(request):
+#     import pdb; pdb.set_trace()
+#     return request.matchdict
 
 #new view for edit.jinja2
 # @view_config(route_name='home', renderer='templates/list.jinja2')
 # def home(request):
 #     #import pdb; pdb.set_trace()
 #     return {"entries":Entry.all()}
+
+def do_login(request):
+    username = request.params.get('username', None)
+    password = request.params.get('password', None)
+    if not (username and password):
+        raise ValueError('both username and password are required')
+
+    settings = request.registry.settings
+    manager = BCRYPTPasswordManager()
+    if username == settings.get('auth.username', ''):
+        hashed = settings.get('auth.password', '')
+        return manager.check(hashed, password)
 
 def main():
     """Create a configured wsgi app"""
@@ -163,8 +187,9 @@ def main():
     config.add_route('home', '/')
     config.add_route('add', '/add')
     config.add_route('other', '/ayylmao/{special_val}')
-    config.add_route('edit', '/edit')
-    config.add_route('detail', '/detail')
+    config.add_route('edit', '/edit/{entryID}')
+    config.add_route('edit_entry', '/edit_entry/{entryID}')
+    config.add_route('detail', '/detail/{entryID}')
     config.add_route('new', '/new')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -172,17 +197,7 @@ def main():
     app = config.make_wsgi_app()
     return app
 
-def do_login(request):
-    username = request.params.get('username', None)
-    password = request.params.get('password', None)
-    if not (username and password):
-        raise ValueError('both username and password are required')
 
-    settings = request.registry.settings
-    manager = BCRYPTPasswordManager()
-    if username == settings.get('auth.username', ''):
-        hashed = settings.get('auth.password', '')
-        return manager.check(hashed, password)
 
 # add imports
 

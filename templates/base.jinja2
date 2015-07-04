@@ -2,48 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title> James's Journal'</title>
+    <title>Python Learning Journal</title>
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <link href="/static/style.css" rel="stylesheet" type="text/css">
-</head>
   </head>
   <body>
     <header>
-    <h1>James Hemmaplardh's Learning Journal</h1>
-        <aside id="user-controls">
-        <ul>
-        {% if not request.authenticated_userid %}
-          <li><a href="{{ request.route_url('login') }}">log in</a></li>
-        {% else %}
-          <li><a href="{{ request.route_url('logout') }}">log out</a></li>
-        {% endif %}
-        </ul>
-        </aside>
-            <nav>
-        <ul id="menu">
-          <li><a href="{{ request.route_url('home') }}">Home</a></li>
-          <li><a href="{{ request.route_url('detail') }}" >Detail</a></li>
-          <li><a href="{{ request.route_url('new') }}" >New</a></li>
-          <li><a href="{{ request.route_url('edit') }}" >Edit</a></li>
-        </ul>
-      </nav>
-      <nav>
-        <ul>
-          <li><a href="/">Home</a></li>
-        </ul>
-      </nav>
+      <h1>Learning Journal</h1>
+      <aside id="user-controls">
+  </ul>
+      </aside>
     </header>
     <main>
-    {% block body %} {% endblock %}
-      <h1>My Python Journal</h1>
-      <p>
-            <h1> INSERT ENTRY LIST OF ENTRY NUMBERS </h1>
-      </p>
+      <section id="content">
+  {% block body %}{% endblock %}
+      </section>
     </main>
-     <footer>
-        <a href="home.html"> To return home, select the Home button above or select this text.
-      </footer>
+    <footer>
+    {% block nav %}{% endblock %}
+    </footer>
   </body>
 </html>
