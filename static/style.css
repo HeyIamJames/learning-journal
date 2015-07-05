@@ -1,3 +1,8 @@
+/** {
+    background-color: #ffb6c1;
+}
+
+*/
 h1 {
     text-align: center;
     color: #0000ff;
@@ -7,20 +12,39 @@ h1 {
 
 #menu li {
   display: inline-block;
-  text-align: left;
+  text-align: center;
   color: #ff0000;
-  font-size: 25px;
-
+  font-size: 20px;
 }
 
+
+#entry {
+    color: #ff00ff;
+    text-decoration: none;
+    text-align: center;
+    height:100px;
+    width:200px;
+    font-size: 75%;
+    overflow:scroll;
+/*     border: 1px solid #000;*/
+   }
+
+
+
 #entries li {
-    text-align: left;
+    /*height:120px;width:120px;border:1px solid #ccc;font:16px/26px Georgia, 
+Garamond, Serif;overflow:auto;*/
+    color: #ff0000;
+    text-decoration: none;
+    text-align: right;
+    display: inline-block;
+
 }
 
 footer {
    position:fixed;
-   bottom:0;
-   background-color: red;
+   top:0;
+   text-align: center;
 }
 
 body{

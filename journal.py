@@ -19,6 +19,9 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 from markdown import markdown
+# from markdown import codehilite
+
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -99,9 +102,7 @@ def init_db():
 @view_config(route_name='home', renderer='templates/index.jinja2')
 def home(request):
     #import pdb; pdb.set_trace()
-     return {"entry":entry,
-        "text":markdown(entry.text, extensions=['codehilite', 
-                                               'fenced_code'])}
+    return {"entries":Entry.all()}
 
 
 @view_config(route_name="detail", renderer="templates/detail.jinja2")
@@ -109,7 +110,9 @@ def detail(request):
     #import pdb; pdb.set_trace()
     entries = Entry.all()
     entry = entries[::-1][int(request.matchdict["entryID"])-1]
-    return {"entry":entry}
+    return {"entry":entry,
+            "text":markdown(entry.text, extensions=['codehilite',
+                                                  'fenced_code'])}
 
 @view_config(route_name="edit", renderer="templates/edit.jinja2")
 def edit(request):
