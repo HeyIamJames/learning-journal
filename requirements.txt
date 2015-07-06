@@ -24,3 +24,4 @@ zope.deprecation==4.1.2
 zope.interface==4.1.2
 zope.sqlalchemy==0.7.6
 Markdown==2.6.2
+Pygments==2.0.2
