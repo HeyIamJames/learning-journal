@@ -1,0 +1,28 @@
+{% extends "base.jinja2" %}
+{% block body %}
+   {% if entries %}
+   <ul>
+	{% for entry in entries %}
+	<li id = "entry" >
+	   <a href="{{ request.route_url('detail', entryID=entry.id) }}">
+	      {{ entry.title }}
+	      <br>{{ entry.created.strftime('%b. %d, %Y') }}
+	   </a>
+	</li>
+	{% endfor %}
+   </ul>	
+   {% else %}
+   <p>No entries here so far</p>
+   {% endif %}
+{% endblock %}
+{% block nav %}
+   <ul id=menu>
+	 <li><a href="/">Home</a></li>
+	 {% if request.authenticated_userid %}   
+	 <li><a href="new">new</a></li>
+	 <li><a href="logout">log out</a></li>
+	 {% else %}
+	 <li><a href="login">log in</a></li>
+   	 {% endif %}
+   </ul>
+{% endblock %}
