@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import os
+import datetime
+import json
 from pyramid.config import Configurator
 from pyramid.view import view_config
 from waitress import serve
-import datetime
 import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
+from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
 from sqlalchemy.exc import IntegrityError
 from pyramid.httpexceptions import HTTPFound
@@ -19,8 +21,6 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
 from markdown import markdown
-# from markdown import codehilite
-
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,8 +34,8 @@ DATABASE_URL = os.environ.get(
 
 class Entry(Base):
     __tablename__ = 'entries'
-    
-    id = sa.Column(sa.Integer, primary_key=True)
+
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.Unicode(127), nullable=False, unique=True)
     text = sa.Column(sa.Unicode(), nullable=False)
     created = sa.Column(
@@ -49,17 +49,34 @@ class Entry(Base):
             session = DBSession
         instance = cls(title=title, text=text)
         session.add(instance)
+        session.flush()
         return instance
-    
+
     @classmethod
     def all(cls, session=None):
         if session == None:
             session = DBSession
         return session.query(cls).order_by(cls.created.desc()).all()
 
+    @classmethod
+    def get_entry_by_id(cls, entry_id, session=None):
+        if session is None:
+            session = DBSession
+        return session.query(cls).filter(cls.id == entry_id).one()
+
+    @classmethod
+    def update(cls, entry_id, title, text, session=None):
+        if session is None:
+            session = DBSession
+        entry = Entry.get_entry_by_id(entry_id, session=session)
+        entry.text = text
+        entry.title = title
+        return entry
+
+
 @view_config(route_name='login', renderer="templates/login.jinja2")
 def login(request):
-    """authenticate a user by username/password"""
+    """authenticatfge a user by username/password"""
     username = request.params.get('username', '')
     error = ''
     if request.method == 'POST':
@@ -87,6 +104,7 @@ def add_entry(request):
     text = request.params.get('text')
     Entry.write(title=title, text=text)
     return HTTPFound(request.route_url('home'))
+    #add entry id
 
 @view_config(context=DBAPIError)
 def db_exception(context, request):
@@ -101,50 +119,57 @@ def init_db():
 
 @view_config(route_name='home', renderer='templates/index.jinja2')
 def home(request):
-    #import pdb; pdb.set_trace()
     return {"entries":Entry.all()}
 
 
 @view_config(route_name="detail", renderer="templates/detail.jinja2")
 def detail(request):
-    #import pdb; pdb.set_trace()
-    entries = Entry.all()
-    entry = entries[::-1][int(request.matchdict["entryID"])-1]
-    return {"entry":entry,
-            "text":markdown(entry.text, extensions=['codehilite',
-                                                  'fenced_code'])}
+    entry = Entry.get_entry_by_id(request.matchdict["entryID"])
+    if 'HTTP_X_REQUESTED_WITH' in request.environ:
+        return Response(body=json.dumps({
+                                        "title": entry.title,
+                                        "text": markdown(
+                                            entry.text,
+                                            extensions=['codehilite',
+                                                        'fenced_code'])
+                                        }), content_type=b'application/json')
+    return {
+        "entry": {
+            "id": entry.id,
+            "text": entry.text,
+            "created": entry.created,
+            "title": entry.title
+        },
+        "markdown_text": markdown(entry.text, extensions=['codehilite',
+                                                          'fenced_code'])
+    }
 
 @view_config(route_name="edit", renderer="templates/edit.jinja2")
 def edit(request):
-    #import pdb; pdb.set_trace()
-    entries = Entry.all()
-    entry = entries[::-1][int(request.matchdict["entryID"])-1]
-    return {"entry":entry}
+    entry = Entry.get_entry_by_id(request.matchdict["entryID"])
+    if 'HTTP_X_REQUESTED_WITH' in request.environ:
+        return Response(body=json.dumps({
+                                        "title": entry.title,
+                                        "text": entry.text
+                                        }), content_type=b'application/json')
+    return {"entry": {
+            "id": entry.id,
+            "text": entry.text,
+            "created": entry.created,
+            "title": entry.title}
+            }
 
-@view_config(route_name="edit_entry",request_method='POST')
+@view_config(route_name="edit_entry", request_method='POST')
 def edit_entry(request):
-    #import pdb; pdb.set_trace()
-    entry = Entry.all()[::-1][int(request.matchdict["entryID"])-1]
-    entry.title = request.params.get('title')
-    entry.text = request.params.get('text')
-    DBSession.flush()
+    entry = Entry.get_entry_by_id(request.matchdict["entryID"])
+    entry.update(entry.id, request.params.get("title"),
+                 request.params.get("text"))
     return HTTPFound(request.route_url('detail', entryID = entry.id))
 
 @view_config(route_name="new", renderer="templates/new.jinja2")
 def new(request):
-    
     return {}
 
-# @view_config(route_name="other", renderer="string")
-# def other(request):
-#     import pdb; pdb.set_trace()
-#     return request.matchdict
-
-#new view for edit.jinja2
-# @view_config(route_name='home', renderer='templates/list.jinja2')
-# def home(request):
-#     #import pdb; pdb.set_trace()
-#     return {"entries":Entry.all()}
 
 def do_login(request):
     username = request.params.get('username', None)
@@ -157,6 +182,7 @@ def do_login(request):
     if username == settings.get('auth.username', ''):
         hashed = settings.get('auth.password', '')
         return manager.check(hashed, password)
+
 
 def main():
     """Create a configured wsgi app"""
@@ -187,7 +213,7 @@ def main():
     config.include('pyramid_tm')
     config.include('pyramid_jinja2')
     config.add_static_view('static', os.path.join(HERE, 'static'))
-    config.add_route('home', '')
+    config.add_route('home', '/')
     config.add_route('add', '/add')
     config.add_route('edit', '/edit/{entryID}')
     config.add_route('edit_entry', '/edit_entry/{entryID}')
@@ -198,15 +224,6 @@ def main():
     config.scan()
     app = config.make_wsgi_app()
     return app
-
-
-
-# add imports
-
-# and then down below write_entry
-
-
-# finally, in the "main" function:
 
 
 if __name__ == '__main__':
