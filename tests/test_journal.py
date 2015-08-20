@@ -83,8 +83,6 @@ def test_empty_title(db_session):
     bad_data = {"title":"", "text":"Test Text"}
     with pytest.raises(ValueError):
         journal.Entry.write(session=db_session, **bad_data)
-    
-        
 
 def test_entry_no_title_fails(db_session):
     bad_data = {'text': 'test text'}
@@ -252,3 +250,4 @@ def test_logout(app):
     assert INPUT_BTN not in actual
 
 import journal
+

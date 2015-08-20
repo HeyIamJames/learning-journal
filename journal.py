@@ -98,6 +98,8 @@ def logout(request):
 
 @view_config(route_name='add', request_method='POST')
 def add_entry(request):
+    if not request.authenticated_userid:
+        return HTTPFound(request.route_url('home'))
     title = request.params.get('title')
     text = request.params.get('text')
     Entry.write(title=title, text=text)
@@ -121,6 +123,8 @@ def home(request):
 
 @view_config(route_name="detail", renderer="templates/detail.jinja2")
 def detail(request):
+    if not request.authenticated_userid:
+        return HTTPFound(request.route_url('home'))
     entry = Entry.get_entry_by_id(request.matchdict["entryID"])
     if 'HTTP_X_REQUESTED_WITH' in request.environ:
         return Response(body=json.dumps({
@@ -143,6 +147,8 @@ def detail(request):
 
 @view_config(route_name="edit", renderer="templates/edit.jinja2")
 def edit(request):
+    if not request.authenticated_userid:
+        return HTTPFound(request.route_url('home'))
     entry = Entry.get_entry_by_id(request.matchdict["entryID"])
     if 'HTTP_X_REQUESTED_WITH' in request.environ:
         return Response(body=json.dumps({
@@ -158,6 +164,8 @@ def edit(request):
 
 @view_config(route_name="edit_entry", request_method='POST')
 def edit_entry(request):
+    if not request.authenticated_userid:
+        return HTTPFound(request.route_url('home'))
     entry = Entry.get_entry_by_id(request.matchdict["entryID"])
     entry.update(entry.id, request.params.get("title"),
                  request.params.get("text"))
