@@ -162,14 +162,6 @@ def edit(request):
             "title": entry.title}
             }
 
-@view_config(route_name="edit_entry", request_method='POST')
-def edit_entry(request):
-    if not request.authenticated_userid:
-        return HTTPFound(request.route_url('home'))
-    entry = Entry.get_entry_by_id(request.matchdict["entryID"])
-    entry.update(entry.id, request.params.get("title"),
-                 request.params.get("text"))
-    return HTTPFound(request.route_url('detail', entryID = entry.id))
 
 @view_config(route_name="new", renderer="templates/new.jinja2")
 def new(request):
