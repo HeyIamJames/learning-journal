@@ -12,8 +12,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPNotFound
-from sqlalchemy.exc import IntegrityError
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.exc import DBAPIError
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -76,7 +74,7 @@ class Entry(Base):
 
 @view_config(route_name='login', renderer="templates/login.jinja2")
 def login(request):
-    """authenticatfge a user by username/password"""
+    """authenticate a user by username/password"""
     username = request.params.get('username', '')
     error = ''
     if request.method == 'POST':
@@ -104,7 +102,6 @@ def add_entry(request):
     text = request.params.get('text')
     Entry.write(title=title, text=text)
     return HTTPFound(request.route_url('home'))
-    #add entry id
 
 @view_config(context=DBAPIError)
 def db_exception(context, request):
@@ -198,9 +195,7 @@ def main():
     if not os.environ.get('TESTING', False):
         engine = sa.create_engine(DATABASE_URL)
         DBSession.configure(bind=engine)
-    # configuration setup
     auth_secret = os.environ.get('JOURNAL_AUTH_SECRET', 'itsaseekrit')
-    # and add a new value to the constructor for our Configurator:
     config = Configurator(
         settings=settings,
         authentication_policy=AuthTktAuthenticationPolicy(
